@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {createDemo,fixturePNG} from '../../scripts/synthetic-data.mjs';
+import {createLocalServer,projectRoot} from '../../scripts/local-server.mjs';
+const exec=promisify(execFile);
+test('intake, dedup, status, image registration, lookup and outfit CLI all share the API',async t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-cli-test-'));createDemo(dir);
+  const server=createLocalServer({dataDir:dir,databasePath:path.join(dir,'wardrobe.sqlite')});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});});
+  const origin='http://127.0.0.1:'+server.address().port,env={...process.env,YIXU_ORIGIN:origin,YIXU_DATA_DIR:dir};
+  const run=async(script,...args)=>(await exec(process.execPath,[path.join(projectRoot,'scripts',script),...args],{env,timeout:20000})).stdout;
+  const image=path.join(dir,'synthetic-source.png');fs.writeFileSync(image,fixturePNG([200,200,100]));
+  const input=path.join(dir,'manifest.json');fs.writeFileSync(input,JSON.stringify({collection:'owned',name:'Synthetic',layer:'inner',subtype:'短袖T恤',color:{name:'黄色',family:'yellow',hex:'#cccc64'},fit:'unknown',pattern:'纯色',styles:[],seasons:[],uncertainties:[],originalPath:image,cutoutPath:image,processingMethod:'segmentation',review:{approved:true,notes:'Synthetic fixture'}}));
+  const added=JSON.parse(await run('intake.mjs',input));assert.equal(added.status,'imported');assert.equal(added.id,'YW-0004');assert.equal(JSON.parse(await run('intake.mjs',input)).status,'duplicate');
+  assert.equal(JSON.parse(await run('lookup-codes.mjs',added.code))[0].id,added.id);
+  assert.equal(JSON.parse(await run('set-garment-status.mjs','pending-discard',added.code)).status,'updated');
+  await run('set-garment-status.mjs','active',added.code);
+  await run('register-media.mjs',image,'assets/outfits/synthetic-v1.png');
+  const look=path.join(dir,'look.json');fs.writeFileSync(look,JSON.stringify({id:'cli-look',title:'Synthetic look',selection:{inner:added.code,bottom:'KZ01'},visual:{kind:'ai',src:'assets/outfits/synthetic-v1.png',alt:'synthetic',garmentIds:[added.code,'KZ01']}}));
+  assert.equal(JSON.parse(await run('save-owned-outfit.mjs',look)).saved,'cli-look');assert.match(await run('save-owned-outfit.mjs',look),/内容相同/);
+  assert.equal((await(await fetch(origin+'/data/catalog.json')).json()).items.length,4);
+  assert(!fs.existsSync(path.join(dir,'dist/data/catalog.json')));
+});

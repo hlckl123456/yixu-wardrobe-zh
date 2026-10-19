@@ -1,0 +1,133 @@
+.fl-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.fl-heading p{font-size:12px;color:var(--muted);margin:0}
+.fl-principles{display:grid;grid-template-columns:1fr 2fr;gap:24px;padding:23px 25px;background:#eef0e7;border-radius:9px;margin:26px 0}
+.fl-principles h2{font:500 23px/1.6 "Songti SC",serif;margin:10px 0 0}
+.fl-principle-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;align-content:center}
+.fl-principle-grid summary{cursor:pointer;list-style:none;font-size:12px;line-height:1.8;padding:7px 0}
+.fl-principle-grid summary::-webkit-details-marker{display:none}
+.fl-principle-grid summary:after{content:' +';color:#839278}
+.fl-principle-grid details[open] summary:after{content:' −'}
+.fl-principle-grid summary>span{font-size:10px;color:#839278;margin-right:4px}
+.fl-principle-grid p{font-size:11px;color:#626f60;margin:4px 0 10px}
+.fl-formula{border:1px solid var(--line);border-radius:10px;background:#fffefa;overflow:hidden}
+.fl-formula>header{padding:25px 27px 0}
+.fl-formula>header h2{font:500 27px/1.5 "Songti SC",serif;margin:9px 0}
+.fl-formula>header p{color:var(--muted);font-size:12px;margin:0}
+.fl-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:25px}
+.fl-actions .btn{font-size:11px}
+.fl-image-button{width:100%;display:block;border:0;border-radius:6px;padding:0;overflow:hidden;position:relative;background:#e8e6dd}
+.fl-image-button img{display:block;width:100%;aspect-ratio:3/4;object-fit:contain;background:#e8e6dd}
+.fl-image-button>span{position:absolute;top:10px;left:10px;font-size:10px;background:#fffefae8;border-radius:3px;padding:5px 7px}
+.fl-image-button>small{position:absolute;bottom:10px;right:10px;color:white;background:#29372bcc;padding:5px 7px;font-size:10px;border-radius:3px}
+.fl-foot{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:20px;font-size:10px;color:var(--muted)}
+#formula-image{width:min(950px,calc(100vw - 32px))}
+.fl-lightbox{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;margin-top:15px}
+.fl-lightbox>img{width:100%;max-height:70vh;object-fit:contain;background:#efeee7;border-radius:7px}
+.fl-lightbox>div{padding-top:25px}
+.fl-lightbox h2{font:500 25px/1.5 "Songti SC",serif}
+.fl-lightbox p{font-size:13px}
+.fl-lightbox-controls{display:flex;align-items:center;gap:15px;margin-top:25px;font-size:12px}
+.fl-source{padding:17px 0;border-bottom:1px solid var(--line)}
+.fl-source h3{font-size:14px}
+.fl-source p{font-size:12px;color:var(--muted);margin-bottom:0}
+.sidebar{overflow-y:auto}
+.garment-image{cursor:pointer}
+.btn[aria-pressed=true]{background:#e6eddf}
+@media(max-width:1150px){
+.fl-principles{grid-template-columns:1fr 1.4fr}
+.fl-principle-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:850px){
+.fl-heading{align-items:start}
+.fl-heading .btn{font-size:10px}
+.fl-principles{padding:20px}
+}
+@media(max-width:600px){
+.fl-heading{display:block}
+.fl-heading .btn{margin-top:12px}
+.fl-principles{grid-template-columns:1fr;gap:13px;padding:18px;margin:21px 0}
+.fl-principles h2{font-size:22px}
+.fl-principle-grid{gap:0 12px}
+.fl-principle-grid summary{font-size:11px}
+.fl-formula>header{padding:20px 18px 0}
+.fl-formula>header h2{font-size:23px}
+.fl-foot{display:block}
+.fl-lightbox{grid-template-columns:1fr;gap:10px}
+.fl-lightbox>img{max-height:49vh}
+.fl-lightbox>div{padding:0}
+.fl-lightbox h2{font-size:22px}
+.fl-lightbox-controls{margin-top:16px}
+}
+.garment-image-button{display:block;width:100%;padding:0;border:0;background:transparent;text-align:inherit;cursor:pointer}
+.garment-image-button .garment-image{display:block}
+.fl-study-body{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,1fr);gap:32px;padding:25px 27px}
+.fl-study-hero{margin:0;min-width:0;max-width:560px}
+.fl-study-hero figcaption{font-size:10px;color:var(--muted);padding:10px 0}
+.fl-study-controls{min-width:0;padding-top:5px}
+.fl-study-controls h3{font:500 25px/1.5 'Songti SC',serif;margin:8px 0}
+.fl-study-controls>p{font-size:12px;color:var(--muted)}
+.fl-palette-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:26px 0 12px}
+.fl-palette-heading small{color:var(--muted);font-size:10px}
+.fl-palette-picker{display:grid;gap:8px}
+.fl-palette-picker button{display:grid;grid-template-columns:88px 1fr 13px;align-items:center;gap:10px;min-height:60px;text-align:left;border:1px solid var(--line);border-radius:7px;background:white;padding:11px 12px;color:var(--ink);font-size:11px;line-height:1.6}
+.fl-palette-picker button[aria-pressed=true]{border-color:#4b654a;background:#eff3e8;box-shadow:0 0 0 1px #4b654a}
+.fl-palette-dots{display:flex;padding-left:4px}
+.fl-palette-dots i{width:21px;height:21px;flex-shrink:0;border-radius:50%;border:1px solid #0002;margin-left:-4px;box-shadow:0 0 0 2px #fff}
+.fl-reference-drawer{border-top:1px solid var(--line);padding:20px 27px;background:#f7f7f1}
+.fl-reference-drawer summary{cursor:pointer;font-size:12px}
+.fl-reference-drawer summary span{font-size:10px;color:var(--muted);margin-left:14px}
+.fl-reference-drawer>p{font-size:11px;color:var(--muted);line-height:1.8}
+.fl-study button:focus-visible{outline:3px solid #738e5d;outline-offset:3px}
+.fl-study-hero .fl-image-button img{height:auto;aspect-ratio:3/4}
+.formula-library{min-width:0}
+.fl-study{scroll-margin-top:24px}
+.fl-study:focus{outline:none}
+.fl-study-controls>p{font-size:13px}
+.fl-study-hero{align-self:start}
+@media(min-width:851px) and (max-width:1200px){
+.fl-study .fl-study-body{grid-template-columns:1fr}
+.fl-study-hero{width:100%;max-width:440px;justify-self:center}
+.fl-palette-picker{grid-template-columns:1fr 1fr}
+.fl-study .fl-palette-picker button{grid-template-columns:1fr 12px}
+.fl-palette-dots{grid-column:1/-1}
+}
+@media(max-width:420px){
+.fl-palette-picker{grid-template-columns:1fr!important}
+}
+@media(max-width:1150px){
+.fl-study-body{gap:22px;grid-template-columns:minmax(0,1fr) minmax(270px,1fr)}
+.fl-palette-picker button{grid-template-columns:76px 1fr 12px;padding:10px 8px}
+.fl-palette-dots i{width:19px;height:19px}
+}
+@media(max-width:700px){
+.fl-study-body{grid-template-columns:1fr;padding:18px;gap:15px}
+.fl-study-hero{max-width:420px;width:100%;justify-self:center}
+.fl-study-controls{padding:0}
+.fl-palette-picker{grid-template-columns:1fr 1fr}
+.fl-palette-picker button{grid-template-columns:1fr 14px;gap:8px;align-content:start}
+.fl-palette-dots{grid-column:1/-1}
+.fl-palette-heading{margin-top:20px}
+.fl-reference-drawer{padding:18px}
+.fl-reference-drawer summary span{display:block;margin:8px 0 0 17px}
+}
+.fl-recent{margin:22px 0 28px;min-width:0}
+.fl-recent-strip{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity}
+.fl-recent-strip button{flex:0 0 124px;padding:0;border:1px solid var(--line,#e1e4dc);border-radius:8px;background:var(--paper,#fff);overflow:hidden;cursor:pointer;scroll-snap-align:start;color:inherit}
+.fl-recent-strip button:hover,.fl-recent-strip button:focus-visible{outline:2px solid var(--accent,#52664f);outline-offset:1px}
+.fl-recent-strip img{width:100%;height:130px;object-fit:contain;background:#eeece6;display:block}
+.fl-recent-strip span{display:block;font-size:12px;line-height:1.5;padding:8px}
+.fl-study{scroll-margin-top:20px}
+@media(max-width:700px){
+.fl-recent-strip button{flex-basis:112px}
+}
+.fl-season-background{margin:20px 0;border:1px solid #cdd8c5;border-radius:10px;background:#f3f5ed;padding:0 20px}
+.fl-season-background>summary{cursor:pointer;padding:18px 0;min-height:52px;font-size:15px;color:#314d39}
+.fl-season-background>summary small{display:block;margin:6px 0 0 18px;font-size:12px;font-weight:400;color:#66745e}
+@media(max-width:850px){
+.fl-season-background{padding:0 14px}
+.fl-season-background>summary{font-size:14px}
+}
+@media(max-width:700px){
+.fl-study .fl-palette-picker button{min-height:52px}
+.fl-lightbox-controls .btn{min-height:44px}
+}

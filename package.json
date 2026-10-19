@@ -1,0 +1,9 @@
+{
+  "name": "yixu-wardrobe-zh",
+  "private": true,
+  "license": "MIT",
+  "repository": {"type":"git","url":"https://github.com/hlckl123456/yixu-wardrobe-zh.git"},
+  "type": "module",
+  "engines": {"node":">=24"},
+  "scripts": {"start":"node scripts/local.mjs start", "stop":"node scripts/local.mjs stop", "status":"node scripts/local.mjs status", "test":"node --test tests/public/*.test.mjs", "check":"node scripts/check.mjs", "demo":"node scripts/demo.mjs", "preview":"node scripts/preview.mjs"}
+}

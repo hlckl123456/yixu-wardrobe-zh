@@ -1,0 +1,28 @@
+.collection-seasons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.collection-seasons a{display:flex;justify-content:space-between;gap:8px;padding:14px 18px;border:1px solid var(--line);border-radius:8px;text-decoration:none;font-size:14px}
+.collection-seasons a[aria-current]{border-color:#526b49;background:#e6ecdf}
+.collection-seasons span{color:var(--muted);font-size:12px}
+.collection select{max-width:100%;min-height:44px;border:1px solid var(--line);border-radius:6px;background:#fffefa;padding:8px;color:var(--ink);font:inherit}
+.collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.collection-card{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fffefa}
+.collection-image{display:block;position:relative;background:#ece9e1}
+.collection-image img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain}
+.collection-image>span{position:absolute;bottom:10px;left:10px;background:#fffefae8;padding:5px 8px;border-radius:4px;font-size:10px}
+.collection-card-body{padding:16px}
+.collection-card-body>p{font-size:12px;color:var(--muted);margin:10px 0}
+.collection a:focus-visible,.collection button:focus-visible,.collection input:focus-visible,.collection select:focus-visible{outline:3px solid #819b68;outline-offset:3px}
+.fl-recent-strip>a{display:block;flex:0 0 124px;background:#fffefa;border:1px solid var(--line);border-radius:8px;text-decoration:none;overflow:hidden;text-align:center}
+.collection .text-button{display:inline-flex;align-items:center;min-height:44px}
+.collection .fl-heading p{font-size:13px;line-height:1.8}
+@media(max-width:1100px){
+.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+.collection-grid{gap:12px;grid-template-columns:1fr}
+.collection-card{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(0,1.2fr)}
+.collection-card-body{padding:12px}
+.collection-image{align-self:start}
+.collection-image>span{position:static;display:block;font-size:10px;padding:7px}
+.collection-seasons{gap:5px}
+.collection-seasons a{padding:12px 8px;font-size:13px;flex-direction:column;align-items:center;gap:4px}
+}

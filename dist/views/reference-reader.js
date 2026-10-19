@@ -1,0 +1,19 @@
+import {esc,codeBadge} from './shared.js';
+import {library} from '../reference-model.js';
+import {seasonRules} from '../data/season-policy.js';
+export function referenceArticle(f){
+  const {studyStyle:style,studyVariant:variant,studyAccessory:accessory}=f;
+  return `<article id="formula-reader" tabindex="-1" class="fl-formula fl-study"><header><h2>${esc(f.title)}</h2></header>
+  <div class="fl-study-body"><figure class="fl-study-hero"><button class="fl-image-button" data-study-image="true" aria-label="放大：${esc(variant.title)}"><img src="${variant.src}" alt="${esc(variant.alt)}" width="825" height="1100" fetchpriority="high"><span>AI 示意</span><small>放大 ↗</small></button></figure>
+  <div class="fl-study-controls"><h3>${esc(style.name)}</h3>
+  <div class="fl-palette-heading"><span class="eyebrow">整套配色</span><small>${style.variants.length} 个版本</small></div>
+  <div class="fl-palette-picker" aria-label="选择配色">${style.variants.map(v=>`<button data-study-palette="${v.id}" aria-pressed="${v.id===variant.id}" title="${esc(v.title)}"><span class="fl-palette-dots" aria-hidden="true">${v.palette.map(([name,hex])=>`<i style="background:${hex}"></i>`).join('')}</span><span>${esc(v.palette.map(([name])=>name).join(' × '))}</span><b aria-hidden="true">${v.id===variant.id?'✓':''}</b></button>`).join('')}</div>
+  <span class="visually-hidden" aria-live="polite">当前配色：${esc(variant.title)}</span>
+  ${style.accessories?`<details class="fl-accessory-options" ${accessory!=='none'?'open':''}><summary>${style.accessories.some(a=>a.id==='bag')?'包袋搭配':'领口点缀'}</summary><div class="fl-accessory-picker" role="group" aria-label="同套可选细节">${style.accessories.map(a=>`<button class="btn" data-study-accessory="${a.id}" aria-pressed="${accessory===a.id}">${esc(a.name)}</button>`).join('')}</div></details>`:''}
+  <div class="fl-actions"><button class="btn primary" data-scroll-matches>看我的衣物与缺项 ↓</button></div>
+  <dl class="fl-wear-tips">${style.tips.map(([label,text])=>`<div><dt>${esc(label)}</dt><dd>${esc(text)}</dd></div>`).join('')}</dl>
+  </div></div>
+  <details class="fl-reference-drawer"><summary>这套穿法的来源 <span>配色与穿法延伸</span></summary><p>${style.evidence?esc(style.evidence):'这套是配色与穿法延伸，并非某张参考图的逐件复刻。'} 参考作品作者与链接尚未核实。</p></details></article>`;
+}
+export function formulaImageDialog(formula,images,index){const im=images[index];return `<div class="dialog-head"><span class="eyebrow">${im.kind==='ai'?'AI 示意 · 非真实衣物':'原始灵感 · 屏幕拍摄'}</span><button class="close-btn" data-close="formula-image" aria-label="关闭参考大图">×</button></div><div class="fl-lightbox"><img src="${im.src}" alt="${esc(im.alt)}"><div>${formula.studyStyle?codeBadge(formula.studyStyle):''}<h2 id="formula-image-title">${esc(im.title)}</h2><p>${esc(im.note)}</p><p class="sources">${im.kind==='ai'?'生成图只说明层次与配色，细节可能有偏差；不代表你已拥有这些衣物。':'原作品作者与链接尚未核实；屏幕拍摄可能影响颜色，不据此判断具体材质。'}</p><div class="fl-lightbox-controls"><button class="btn" data-gallery-step="-1" aria-label="上一张参考图" ${index===0?'disabled':''}>←</button><span aria-live="polite">${index+1} / ${images.length}</span><button class="btn" data-gallery-step="1" aria-label="下一张参考图" ${index===images.length-1?'disabled':''}>→</button></div></div></div>`;}
+export function formulaSources(){return `<div class="dialog-head"><h2 id="source-title">来源与季节说明</h2><button class="close-btn" data-close="formula-sources" aria-label="关闭来源说明">×</button></div><section class="fl-source"><h3>关于示意图</h3><p>AI 图用于比较层次与配色，不是真实衣物或试穿照片，细节可能有偏差。实际材质、厚薄和保暖能力以实物为准。</p></section><section class="fl-source"><h3>季节说明</h3><p>按以下顺序归类，命中后停止；同套穿法只出现一次。分类方便浏览，不是天气或保暖承诺。</p><ol>${seasonRules.map(([name,rule])=>`<li><b>${name}</b>：${esc(rule)}</li>`).join('')}</ol></section>${library.sources.map(s=>`<section class="fl-source"><h3>${s.url?`<a href="${s.url}" target="_blank" rel="noreferrer">${esc(s.title)} ↗</a>`:esc(s.title)}</h3><p>${esc(s.text)}</p></section>`).join('')}`;}

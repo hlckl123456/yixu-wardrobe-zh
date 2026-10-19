@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createLocalServer} from '../../scripts/local-server.mjs';
+import {createDemo} from '../../scripts/synthetic-data.mjs';
+test('same-origin API and registered-only media, empty library, ETags, tamper detection',async t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-server-public-'));createDemo(dir);
+  const server=createLocalServer({dataDir:dir,databasePath:path.join(dir,'wardrobe.sqlite')});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});});
+  const origin='http://127.0.0.1:'+server.address().port,get=path=>fetch(origin+path);
+  const catalogResponse=await get('/data/catalog.json'),catalog=await catalogResponse.json();assert.equal(catalog.items.length,3);
+  assert.equal((await fetch(origin+'/data/catalog.json',{headers:{'If-None-Match':catalogResponse.headers.get('etag')}})).status,304);
+  assert.equal((await(await get('/__yixu_local/api/state')).json()).relationships.garments.length,2);
+  assert.deepEqual((await(await get('/__yixu_local/api/references')).json()).formulas,[]);
+  fs.writeFileSync(path.join(dir,'public','assets','secret.txt'),'not registered');
+  for(const url of ['/assets/secret.txt','/wardrobe.sqlite','/backups/secret.json','/.local-data/owner/wardrobe.sqlite','/%2e%2e%2fAGENTS.md'])assert.equal((await get(url)).status,404,url);
+  for(const headers of [{},{origin:'https://attacker.example','content-type':'application/json','x-yixu-client':'3'}])assert.equal((await fetch(origin+'/__yixu_local/api/command',{method:'POST',headers,body:'{}'})).status,403);
+  const asset=catalog.items[0].assets.cutout;assert.equal((await get('/'+asset)).status,200);fs.appendFileSync(path.join(dir,'public',asset),'modified');assert.equal((await get('/'+asset)).status,409);
+  assert.equal((await fetch(origin+'/__yixu_local/api/command',{method:'POST',headers:{origin,'content-type':'application/json','x-yixu-client':'3'},body:JSON.stringify({command:{type:'curate'},requestId:'retired-op-test'})})).status,410);
+});

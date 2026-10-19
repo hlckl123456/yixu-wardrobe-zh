@@ -1,0 +1,49 @@
+:root{
+  --text-secondary: #59664e;
+  --touch-size: 44px;
+}
+.topbar, footer, .tiny-label, .eyebrow, .private-label, .brand small{
+  color: var(--text-secondary);
+}
+.outfits-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.outfits-grid article{
+  min-width: 0;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.outfits-grid h2{ overflow-wrap: anywhere; }
+@media (max-width: 850px){
+.sidebar nav{ flex-wrap: wrap; justify-content: flex-start; }
+.sidebar nav > a{ white-space: nowrap; flex-shrink: 0; }
+}
+@media (max-width: 480px){
+.outfits-grid article{ padding: 16px; }
+}
+.data-recovery{border:1px solid #b49374;background:#fff7eb;padding:20px;border-radius:12px;margin-bottom:24px;overflow-wrap:anywhere}
+.data-recovery h2{font-size:20px}
+.data-recovery p{max-width:75ch}
+.data-recovery details{margin-top:14px}
+.fl-accessory-options{margin:1rem 0;padding:1rem;border:1px solid var(--line,#dce2db);border-radius:12px;background:var(--surface,#fff)}
+.fl-accessory-options summary{cursor:pointer;font-weight:600}
+.fl-accessory-picker{display:flex;gap:.5rem;flex-wrap:wrap}
+.fl-accessory-picker [aria-pressed="true"]{background:#365445;color:white}
+.nav-secondary{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}
+.sidebar .nav-secondary a{font-size:13px;color:var(--muted)}
+.fl-wear-tips{margin:24px 0 0;border-top:1px solid var(--line)}
+.fl-wear-tips>div{padding:14px 0;border-bottom:1px solid var(--line)}
+.fl-wear-tips dt{font-weight:600;font-size:13px;margin-bottom:5px}
+.fl-wear-tips dd{margin:0;font-size:14px;line-height:1.8;color:var(--muted)}
+.fl-study-controls>.fl-actions{margin-top:20px}
+.fl-accessory-picker{padding-top:12px}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:850px){
+.nav-secondary{display:flex;gap:4px;border-top:0;border-left:1px solid var(--line);padding:0 0 0 8px;margin:0}
+.nav-secondary a{white-space:nowrap}
+}

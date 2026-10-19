@@ -1,0 +1,128 @@
+.nav-label{display:block;font-size:10px;letter-spacing:2px;color:var(--muted);padding:12px 16px}
+.data-status{margin:20px 0;padding:20px;border:1px solid var(--line);border-radius:10px;background:#f5f5ed;font-size:12px;line-height:1.8}
+.data-status h2{font-size:16px}
+.wardrobe-tabs a[aria-current]{background:#334d3e;color:white;border-color:#334d3e}
+.owned-layers .btn{min-width:110px;min-height:58px}
+.owned-card h3{font-size:14px;line-height:1.7;margin:0;overflow-wrap:anywhere}
+.owned-card small{display:block;color:var(--muted);line-height:1.8;font-size:11px}
+.owned-card .text-button{display:inline-block;min-height:44px;margin-top:6px}
+.owned-card .garment-info{min-width:0}
+.reference-library .collection-seasons{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:24px}
+.reference-count,.reference-back,.outfit-page-tools{display:flex;justify-content:space-between;gap:16px;align-items:center;margin:24px 0}
+.reference-count p,.outfit-page-tools{font-size:12px;color:var(--muted)}
+.reference-count h2{font-size:21px}
+.reference-count small{font:12px system-ui;color:var(--muted)}
+.collection-card-body h2{font-size:17px;line-height:1.7;margin:0}
+.collection-card-body h2 a{text-decoration:none}
+.reference-library a:focus-visible,.owned-card button:focus-visible,.outfit-card-link:focus-visible{outline:3px solid #819b68;outline-offset:3px}
+.owned-matches{margin:36px 0;scroll-margin-top:24px;border-top:1px solid var(--line);padding-top:32px}
+.owned-matches>header h2{font:500 26px/1.6 "Songti SC",serif}
+.owned-matches>header p{font-size:13px;line-height:1.9;color:var(--muted)}
+.owned-matches .match-summary{background:#e8eddf;color:#354b3b;padding:14px 18px;border-radius:8px}
+.match-group{margin-top:30px}
+.match-group>h3{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.match-rule{margin:20px 0 28px}
+.match-rule-heading{display:flex;gap:14px;align-items:start;justify-content:space-between}
+.match-rule-heading h4{font-size:14px;line-height:1.8;margin:0}
+.match-rule-heading span{flex-shrink:0;color:#526747;font-size:11px;background:#edf1e7;border-radius:5px;padding:7px}
+.match-criteria,.match-empty,.match-excluded{font-size:12px;line-height:1.9;color:var(--muted)}
+.match-empty{padding:16px;background:#f0eee6;border-radius:7px}
+.match-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:16px}
+.match-cards .garment-image{height:160px;object-fit:contain;padding:12px}
+.match-cards .garment-info{padding:12px}
+.outfits-grid.real-outfits{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.outfits-grid .real-outfit-card{padding:0;display:block;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fffefa}
+.outfit-card-link{display:inline-block;color:var(--muted);text-decoration:none;font-size:11px;min-height:44px;padding-top:14px}
+.outfit-composition{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;background:#edece5;padding:20px}
+.outfit-piece{min-width:0;position:relative;border-radius:8px;background:#fafaf4;padding:16px 8px 8px}
+.outfit-piece>span{font-size:10px;color:var(--muted);position:absolute;top:5px;left:8px}
+.outfit-piece img{display:block;width:100%;height:145px;object-fit:contain}
+.outfit-piece p{font-size:11px;overflow-wrap:anywhere}
+.outfit-caption{font-size:10px;letter-spacing:1px;color:var(--muted);padding:10px 20px;margin:0;background:#edece5}
+.outfit-card-copy{padding:16px}
+.outfit-card-copy h2{font-size:18px;line-height:1.6;margin:0 0 8px}
+.outfit-card-copy p{font-size:12px;color:var(--muted)}
+.outfit-detail-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:30px;align-items:start}
+.outfit-detail-hero{border-radius:12px;overflow:hidden}
+.outfit-detail-hero .outfit-piece img{height:190px}
+.outfit-wearing p,.outfit-wearing li{font-size:13px;line-height:1.9}
+.outfit-garments{margin-top:35px}
+.outfit-garments>h2{font-size:22px}
+.outfit-garments .flow-cards>div>h3{font-size:12px;color:var(--muted)}
+.outfit-visual{position:relative;background:#eeece4;display:block;width:100%;border:0;padding:0;text-align:left;cursor:zoom-in;color:inherit}
+.outfit-visual img{width:100%;height:auto;aspect-ratio:2/3;object-fit:contain;display:block}
+.outfit-visual span{display:flex;justify-content:space-between;padding:10px 14px;font-size:10px;color:var(--muted)}
+.outfit-visual b{font-weight:400}
+.outfit-visual:focus-visible,.outfit-id:focus-visible{outline:3px solid #819b68;outline-offset:-3px}
+.outfit-id-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.outfit-id{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#f6f7f1;color:var(--muted);font:10px/1.5 system-ui;cursor:pointer}
+.outfit-id b{font-size:11px;font-weight:500;color:var(--ink)}
+.outfit-card-copy .outfit-category{font-size:10px;letter-spacing:1px;margin:0 0 7px}
+.outfit-wearing-cue{line-height:1.8;margin:8px 0}
+.outfit-filters .owned-layers{margin:0 0 12px}
+.outfit-filters .subcategory-tabs{margin:0}
+.outfit-filters .btn{gap:8px}
+.outfit-filters .btn span{font-size:11px;opacity:.7}
+.outfit-page-tools{margin:12px 0}
+.lookbook-disclaimer{font-size:11px;line-height:1.8;color:var(--muted);margin:0 0 20px;max-width:850px}
+#outfit-image{width:min(800px,94vw)}
+#outfit-image .dialog-head h2{font-size:18px;margin:0}
+.owned-lightbox-image{display:block;width:100%;height:min(76vh,1000px);object-fit:contain;background:#f3f1eb}
+.real-outfits .empty{grid-column:1/-1}
+.fl-recent-strip a span{display:block;font-size:12px;line-height:1.6;padding:9px}
+@media(max-width:1100px){
+.outfits-grid.real-outfits{grid-template-columns:repeat(2,minmax(0,1fr))}
+.match-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.outfit-composition{padding:12px;gap:7px}
+.outfit-piece img{height:120px}
+}
+@media(max-width:600px){
+.subcategory-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;max-width:100%;scrollbar-width:thin}
+.subcategory-tabs .btn{flex:0 0 auto;white-space:nowrap}
+.owned-layers{margin-bottom:10px}
+}
+@media(max-width:850px){
+.sidebar nav{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.sidebar nav>a{justify-content:center;font-size:14px}
+.sidebar .nav-secondary{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;border:0;border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+.nav-label{display:none}
+.sidebar .nav-secondary a{font-size:11px;padding:8px 12px}
+.outfit-detail-layout{grid-template-columns:1fr}
+.outfit-detail-hero .outfit-piece img{height:180px}
+}
+@media(max-width:600px){
+.owned-layers .btn{min-width:0;flex:1 1 27%;min-height:52px}
+.owned-layers .icon{width:16px}
+.reference-count,.reference-back{flex-wrap:wrap;gap:8px}
+.reference-count p{margin-top:0}
+.reference-library .fl-heading{gap:12px;flex-wrap:wrap}
+.reference-library .fl-heading h1{font-size:25px}
+.reference-library .collection-seasons a{font-size:12px;padding:12px 4px}
+.collection-card-body h2{font-size:15px}
+.match-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.match-rule-heading{flex-wrap:wrap;gap:6px}
+.match-cards .garment-image{height:135px}
+.owned-card h3{font-size:12px}
+.outfits-grid.real-outfits{grid-template-columns:1fr}
+.outfit-composition{padding:14px;gap:8px}
+.outfit-piece img{height:125px}
+.outfit-card-copy{padding:18px}
+.outfit-card-copy h2{font-size:18px}
+.outfit-detail-hero .outfit-piece img{height:125px}
+.intro{flex-wrap:wrap}
+.lookbook-intro .eyebrow{display:none}
+.outfit-filters .owned-layers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.outfit-filters .owned-layers .btn{min-height:52px;min-width:0;padding:7px 3px;flex-direction:column;gap:3px}
+.outfit-filters .owned-layers .btn span{font-size:10px}
+.match-rule-heading span{flex-shrink:1}
+}
+.card-title-button{border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.card-title-button:hover,.outfit-card-copy h2 a:hover{text-decoration:underline;text-underline-offset:4px}
+.usage-count{color:var(--muted);font-size:11px}
+.usage-filters{margin-top:14px;flex-wrap:wrap}
+.garment-outfits{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:10px}
+.garment-outfits h3{margin:0;font-size:14px}
+.related-outfits{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.related-outfits a{border:1px solid var(--line);border-radius:6px;padding:5px;max-width:100%}
+.related-outfits a>span:last-child:not(.communication-code){display:none}
+.related-outfits a:hover{background:var(--sage-light,#f0f3ec)}
