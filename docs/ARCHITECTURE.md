@@ -1,32 +1,39 @@
-# Runtime data boundary
+# 架构说明
 
-Browser views → local JSON API → domain validation → one SQLite transaction.
+衣序在本机运行。浏览器向 `127.0.0.1` 上的服务读取衣物、搭配和图片；数据库与图片都留在 `YIXU_DATA_DIR` 指定的数据目录。网页没有写入按钮，维护命令也通过同一个本机服务提交修改。
 
-| Entity | Authority | Behavior |
+## 数据由谁保存
+
+| 数据 | SQLite 表 | 约束 |
 | --- | --- | --- |
-| Garment | garments + identities | Metadata JSON, constrained availability, persistent deletion tombstone |
-| Outfit | outfits + identities | Descriptive JSON; no duplicate selection, source or image fields |
-| Membership | outfit_items | Garment FK, outfit FK, unique slot and garment per outfit |
-| Derivation | outfit_sources | Source refers to permanent identity; parent deletion never deletes descendants |
-| Images | garment_versions / outfit_visuals + media_assets | Immutable relative paths, SHA-256, explicit version/provenance |
-| Notes / old drafts / curation | notes / metadata / formula_preferences | Retained, never used as an alternate active formula engine |
-| References / guides / preferences | documents | Validated versioned command snapshots; CK reservations stay in document |
-| Command/import receipts | commands / imports | Transactional idempotency and legacy import fingerprints |
+| 衣物与编号 | `garments`、`identities` | 衣物状态与拥有关系分开保存；删除后编号仍保留。 |
+| 搭配与编号 | `outfits`、`identities` | 标题、季节、风格等描述存在搭配记录中；保存顺序有独立位置。 |
+| 搭配使用的衣物 | `outfit_items` | 外键连到真实衣物；同一套搭配不能重复占用槽位或重复引用同一件衣物。 |
+| 搭配来源 | `outfit_sources` | 记录搭配之间的来源关系；移除上游搭配不会抹掉后续搭配。 |
+| 图片和版本 | `garment_versions`、`outfit_visuals`、`media_assets` | 登记相对路径和 SHA-256；图片文件不可原地覆盖。 |
+| 笔记与旧资料 | `notes`、`documents`、`formula_preferences` | 保留历史资料和偏好，不再把旧穿搭参考作为当前页面入口。 |
+| 操作记录 | `commands`、`imports` | 帮助识别重复请求和已迁移数据。 |
 
-An explicitly saved planned outfit has `outfitKind: "planned"` plus validated `suggestedPieces` in its descriptive SQL payload. These unpurchased concepts have no inventory IDs and never enter `outfit_items`; only real owned components receive foreign-key memberships. The separate `upsert-planned-outfit` command preserves this distinction through normalization, snapshots and backups. All outfit views disclose incomplete ownership. Ordinary owned saves continue to reject shopping concepts.
+`wardrobe.sqlite` 是衣物、正式搭配及其关联的唯一可写记录。服务返回的 `catalog.json` 等资源是数据库生成的浏览结果，不是第二份需要同步的文件。
 
-SQLite uses foreign_keys=ON, WAL, busy_timeout, synchronous=FULL and BEGIN IMMEDIATE. Migrations are transactional; a newer schema is rejected. Garment IDs and outfit aliases are never reused. Ordinary commands write only affected rows and increment one revision. State and relationship projections share that revision.
+待购搭配会明确标为 `outfitKind: "planned"`。它可以描述 `suggestedPieces`，但这些未购单品没有衣物编号，也不会写入 `outfit_items`。搭配中真正拥有的单品仍由 `outfit_items` 关联。普通搭配不能用待购描述冒充已有衣物。
 
-Files cannot join a SQL transaction. Media staging writes/fsyncs a temporary file and publishes it without overwrite. Registration verifies hashes; commands validate registered assets before recording relationships. Failed operations may leave a harmless unregistered file. No automatic orphan deletion is performed. Serving uses an explicit URL registry, realpath containment and a hash check; source archives, preferences, databases and backups are unreachable.
+## 写入与图片
 
-The server projects catalog/reference/thumbnail URLs for browser compatibility. These URLs are not independent writable files. Primary views remain usable if reference parsing fails. Taxonomy, matching, route adaptation, legacy storage reading and view rendering retain separate modules.
+维护命令先读取当前记录，再把带有预期旧值的命令交给本机服务。服务校验业务规则和关联后，在一个 SQLite 事务里提交。数据库开启外键检查；编号一经分配就不复用。修改搭配内容不会改变它原来的展示位置。
 
-The `#mix` browser view derives its eligible pool from the current outfit and garment API projections. It excludes planned looks, missing visuals and unavailable garments, then applies the shared season/style filters. A session-only shuffled queue stores outfit IDs per filter scope; each render resolves them against current records, and membership changes invalidate that scope. No separate relationship mapping, generated outfit or persisted preference is created. Cards and details use the same renderer as My Outfits.
+图片先写入数据目录，再按哈希登记。搭配或衣物只能引用已登记、仍可使用的图片。服务只提供登记过的准确地址，并核对文件是否仍在数据目录内、内容是否匹配哈希。撤下图片会收回公开地址；旧文件仍可留在私人恢复资料中。数据库事务无法同时回滚文件写入，所以失败后可能有未登记文件，程序不会自动删除它。
 
-Runtime rendering uses `views/personal.js` with the desktop shell in `workspace.js`/`workspace.css`. Pending discard remains a separate availability view linked from the wardrobe; its overview tab (`#closet?view=overview`) replaces the item grid with non-interactive category and color charts derived by `closet-overview.js` from active catalog records, without persisting analytics. Browser resources refresh through the existing validated catalog resource and local repository. Dialogs resolve current SQL memberships and retain explicit unknown/error states. The independent classic `appearance.js` applies one of four CSS palettes before styling loads and remembers only its theme identifier under `yixu:appearance:v1`; it never writes wardrobe storage or SQL. A blocked storage API falls back to the default palette while session switching remains available.
+每次数据写入前会保留数据库快照。完整备份还要复制已登记图片；单独的 SQLite 快照不能替代[完整备份](MAINTENANCE.md#备份与恢复)。
 
-`workspaceRoute` retires the reference UI and redirects legacy analysis links into the wardrobe overview. The runtime no longer imports reference features or requests reference/guide documents. Historical `baseRoute` and source-link resolution remain separate for CLI validation of stored provenance; removing a browser feature does not rewrite outfit sources or delete private originals. Personal notes remain accessible separately when present.
+## 页面如何读取
 
-Tests are deterministic synthetic fixtures. Owner-specific historical regression scripts are kept in private migration archives, not the public test suite. A release export excludes Git, private archives, candidate batches, all photos and deployment metadata. It is not a publication operation.
+「我的搭配」读取完整列表并保留保存顺序。季节和风格按钮只筛选显示结果。「随心配」从已有搭配中挑选有配图、所用衣物仍在用的普通搭配，按当前心情与季节再筛选。每个筛选范围在本次会话内维护随机队列，优先展示尚未看过的搭配；换范围后可以回到该范围当前批次。它不会生成、保存或重排搭配。
 
-Limitations: single local user, read-only website, manual CLI maintenance, no authentication/LAN serving, no automatic synchronization or background AI. Runtime SQL snapshots do not themselves copy private processing archives; portable backup copies the registered media set. Restore always targets a new directory to protect newer edits.
+「我的衣橱」从衣物记录和搭配关联计算分类与引用次数。「衣橱概览」只统计在用衣物的类别与色系，不另存分析结果。「准备丢弃」是衣物状态视图，设置状态不等于物理丢弃。四套配色只在浏览器保存主题标识，不写入衣橱数据库；无法使用浏览器存储时仍可在当前页面切换。
+
+浏览器从本机接口读取数据，读取失败会显示错误，不会把缺失数据当作空衣橱。旧版浏览器存储仅用于迁移；迁移不会清除原字节。旧「穿搭参考」和「衣橱结构」链接会进入当前页面，但历史来源标识仍保留，以便核对已有记录。
+
+## 测试与发布范围
+
+测试使用临时数据库和合成图片。公开源码导出只包含允许发布的程序与文档，不带私人图片、数据库、候选页或旧 Git 历史。服务设计用于单人本机使用；它没有账号、多人权限、自动同步或内置 AI 服务。
