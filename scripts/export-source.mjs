@@ -6,6 +6,7 @@ export function exportSource(target){
   if(!path.isAbsolute(target)||fs.existsSync(target)||target.startsWith(root))throw Error('请选择仓库外、尚不存在的绝对目录');
   const files=[];
   function allowed(relative){
+    if(relative==='docs/AGENT-WORKFLOW.md')return true;
     if(['README.md','AGENTS.md','LICENSE','SECURITY.md','package.json','.gitignore','启动衣橱.command','停止衣橱.command','Start Wardrobe.command','Stop Wardrobe.command','docs/ARCHITECTURE.md','docs/MAINTENANCE.md','docs/DEMO.md','docs/ci-workflow.yml.example','.github/workflows/test.yml'].includes(relative))return true;
     if(/^scripts\/(?:english-|localize-english|finalize-english)/.test(relative))return false;
     if(/^scripts\/[\w-]+\.(mjs|zsh)$/.test(relative)||/^tests\/public\/[\w.-]+\.(mjs|js)$/.test(relative))return true;

@@ -15,3 +15,4 @@
 - For large migrations: baseline and consistent backup first, migrate/test a copy, verify every record/hash/code, pause writes for final comparison, then cut over. Rollback restores into a new directory and must account for post-cutover edits.
 - Never publish a private development checkout or its historical commits. Use an audited source-only export for a public release. Do not rewrite published history without an explicit request.
 - Read README and docs/ARCHITECTURE.md for supported commands, boundaries, backup/restore and source export.
+- Read docs/AGENT-WORKFLOW.md before photo intake, outfit candidate work, or handing a wardrobe over to another chat. It contains reusable methods only; personal preferences and permissions come from the current wardrobe's private records.

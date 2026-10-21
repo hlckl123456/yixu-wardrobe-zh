@@ -67,6 +67,7 @@ npm start
 
 ## 更多说明
 
+- [衣橱整理与 AI 协作流程](docs/AGENT-WORKFLOW.md)：图片预处理、搭配审核、常见识别问题和新 chat 交接模板。
 - [演示说明](docs/DEMO.md)：按顺序浏览合成示例。
 - [维护说明](docs/MAINTENANCE.md)：录入、修改、备份和恢复自己的衣橱。
 - [架构说明](docs/ARCHITECTURE.md)：数据库、图片和搭配关联如何保存。
