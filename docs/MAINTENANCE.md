@@ -44,9 +44,11 @@ Set `YIXU_ORIGIN` when using a non-default server. Media operations require `YIX
 - `node scripts/intake.mjs /absolute/reviewed-manifest.json`: validate a reviewed cutout, deduplicate source hashes, stage immutable media, and commit the garment. Required manifest fields: collection=owned, name, layer, subtype, color{name,family,hex}, fit, pattern, styles[], seasons[], uncertainties[], originalPath, cutoutPath, processingMethod, review{approved,notes}. AI reconstruction additionally requires review.reconstructionAuthorized and its explicit user authorization. Optional original HEIC sourcePath is hashed, not copied. Multiple garments in one source need stable sourceItemKey.
 - `node scripts/set-garment-status.mjs pending-discard SY01`: availability, not physical disposal. `active` restores availability.
 - `node scripts/register-media.mjs /absolute/reviewed.png assets/outfits/versioned-name.png`: register immutable reviewed output before saving a look.
-- `node scripts/save-owned-outfit.mjs /absolute/look.json`: full stable record, exact garment IDs/codes, optional visual/assumedBasics/source link; validates and snapshots before commit.
+- `node scripts/save-owned-outfit.mjs /absolute/look.json`: full stable record, exact garment IDs/codes, optional visual/assumedBasics/source link; validates and snapshots before commit. Explicit `outfitKind: "planned"` records require validated `suggestedPieces` and keep unpurchased pieces outside inventory.
 - `node scripts/remove-owned-outfits.mjs DP01`: explicit exact-record removal. Garments/media and all code reservations remain.
 - The `remove-garments` API command requires full expected garment records; if used, it requires the exact full `relatedOutfits` impact set. Both removals commit together. No implicit broad cascade.
+- `restore-garments` requires archived records plus exact identity, tombstone and image-version snapshots. It does not restore removed outfits.
+- `retire-assets` revokes exact registered media URLs or redirects eligible old review documents to a registered replacement. It does not delete original bytes from private recovery history.
 - For a garment image update, use `upsert-garment` with full expected record, new registered asset, and the previous image version retained in imageHistory.
 - `node scripts/check.mjs --data-dir /absolute/private-directory`: integrity, foreign keys, all media hashes, current alpha.
 

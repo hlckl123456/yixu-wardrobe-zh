@@ -2,6 +2,7 @@ import {DatabaseSync} from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {isDeepStrictEqual} from 'node:util';
 import {normalizePreferences,emptyPreferences} from '../dist/data-schema.js';
 import {createBackup,mergeBackup} from '../dist/backup-model.js';
 import {applyCommand} from '../dist/data-commands.js';
@@ -44,6 +45,7 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
   function checkMedia(relative,expected){
     const registered=db.prepare('SELECT * FROM media_assets WHERE url=?').get(relative);
     if(!registered)throw Error('图片尚未登记：'+relative);
+    if(registered.kind==='retired'||registered.kind.startsWith('redirect:'))throw Error('资源已从页面移除，不能重新引用：'+relative);
     if(expected&&registered.sha256!==expected)throw Error('图片校验值不符：'+relative);
     return registered;
   }
@@ -51,6 +53,7 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
     if(!mediaRoot)throw Error('未配置私人图片目录');
     const relative=record.url.replace(/^\//,'');
     if(!/^(assets|reviews)\//.test(relative))throw Error('仅允许登记图片和候选资源');
+    if(record.kind==='retired'||record.kind?.startsWith('redirect:'))throw Error('资源访问状态须通过显式维护命令修改');
     const file=containedFile(mediaRoot,relative),real=fs.realpathSync(file);
     if(!real.startsWith(fs.realpathSync(mediaRoot)+path.sep)||!fs.statSync(real).isFile())throw Error('资源路径越界');
     const bytes=fs.readFileSync(real),digest=hash(bytes);
@@ -59,6 +62,31 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
     if(old&&old.sha256!==digest)throw Error('已登记文件不可覆盖，请使用新的版本路径');
     db.prepare('INSERT OR IGNORE INTO media_assets VALUES (?,?,?,?,?)').run(relative,relative,digest,bytes.length,record.kind||'media');
     return {...record,url:relative,sha256:digest,size:bytes.length};
+  }
+  function retireAssets(records){
+    if(!Array.isArray(records)||!records.length||records.length>500||new Set(records.map(r=>r?.expected?.url)).size!==records.length)throw Error('请指定无重复的确切资源');
+    const updates=records.map(record=>{
+      const expected=record?.expected,actual=db.prepare('SELECT * FROM media_assets WHERE url=?').get(expected?.url);
+      if(!actual||!expected||Object.keys(expected).length!==Object.keys(actual).length||Object.keys(actual).some(k=>actual[k]!==expected[k]))throw Error('资源记录已改变，请重新核对');
+      const url=actual.url;
+      if(!/^(reviews\/[\w-]+\/|assets\/(items|outfits)\/)/.test(url))throw Error('只允许维护确切的衣物、搭配和候选资源');
+      const used=db.prepare(`SELECT 1 FROM garment_versions v JOIN garments g ON g.id=v.garment_id
+        WHERE g.deleted_at IS NULL AND (v.asset_url=? OR EXISTS(SELECT 1 FROM json_tree(v.data) WHERE type='text' AND value=?))
+        UNION ALL SELECT 1 FROM outfit_visuals v WHERE v.asset_url=? OR EXISTS(SELECT 1 FROM json_tree(v.data) WHERE type='text' AND value=?)
+        UNION ALL SELECT 1 FROM documents d WHERE d.key IN ('thumbnails','reference-catalog','guides') AND EXISTS(SELECT 1 FROM json_tree(d.data) WHERE type='text' AND value=?) LIMIT 1`).get(url,url,url,url,url);
+      if(used)throw Error('资源仍被当前衣物、搭配或资料使用：'+url);
+      if(record.redirectTo!==undefined){
+        const target=record.redirectTo;
+        if(typeof target!=='string'||!/^reviews\/[\w-]+\/[\w/.-]+\.(html|json|js|css)$/.test(url)||!/^reviews\/[\w-]+\/[\w/.-]+\.(html|json|js|css)$/.test(target)||target.split('/').some(p=>p==='..'||p.startsWith('.'))||target===url)throw Error('候选跳转路径无效');
+        checkMedia(target);
+        if(records.some(r=>r?.expected?.url===target))throw Error('跳转目标不能同时移除');
+        return {url,kind:'redirect:'+target};
+      }
+      return {url,kind:'retired'};
+    });
+    // Keep immutable bytes and identity history for private recovery; only revoke
+    // their public URL. Validate the full batch before changing any access state.
+    for(const u of updates)db.prepare('UPDATE media_assets SET kind=? WHERE url=?').run(u.kind,u.url);
   }
   function writeGarment(record,position){
     const {id,code,assets:currentAssets,provenance,imageHistory,wardrobeStatus,...payload}=record;
@@ -104,7 +132,10 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
     if(derivedFromOutfitId&&!db.prepare("SELECT 1 FROM identities WHERE id=? AND kind='outfit'").get(derivedFromOutfitId))throw Error('来源 ID 未保留，无法确认关系');
     const old=db.prepare('SELECT data FROM outfits WHERE id=?').get(id);
     const oldPayload=old?parse(old.data):{};
-    const known=new Set(old?Object.keys(normalizePreferences({outfits:[{id,selection,...oldPayload}]}).outfits[0]):[]);
+    // Normalize the old payload with its old memberships, not the incoming ones.
+    // A purchased outer may now fill a slot previously occupied by a concept.
+    const oldSelection=old?Object.fromEntries(db.prepare('SELECT slot,garment_id FROM outfit_items WHERE outfit_id=? ORDER BY position').all(id).map(r=>[r.slot,r.garment_id])):{};
+    const known=new Set(old?Object.keys(normalizePreferences({outfits:[{id,selection:oldSelection,...oldPayload}]}).outfits[0]):[]);
     const opaque=Object.fromEntries(Object.entries(oldPayload).filter(([key])=>!known.has(key)));
     db.prepare('INSERT INTO outfits VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(id,position,json({...opaque,...payload}));
     db.prepare('DELETE FROM outfit_items WHERE outfit_id=?').run(id);
@@ -209,7 +240,7 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
     commit(command,requestId,resolveReference){
       if(typeof requestId!=='string'||!/^[\w-]{8,100}$/.test(requestId))throw Error('缺少有效的请求编号');
       if(!command||typeof command!=='object')throw Error('数据操作格式无效');
-      const maintenance=['set-garment-status','upsert-garment','remove-garments','register-assets','set-document','swap-outfit-positions'];
+      const maintenance=['set-garment-status','upsert-garment','restore-garments','remove-garments','register-assets','retire-assets','set-document','swap-outfit-positions'];
       if(!maintenance.includes(command.type))assertCurrentCommand(command.type);
       const fingerprint=hash(json(command));return tx(()=>{
         const existing=db.prepare('SELECT fingerprint FROM commands WHERE id=?').get(requestId);
@@ -233,6 +264,8 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
           if(command.type==='register-assets'){
             if(!Array.isArray(command.assets)||!command.assets.length)throw Error('缺少资源');
             for(const asset of command.assets)registerAsset(asset);
+          }else if(command.type==='retire-assets'){
+            retireAssets(command.records);
           }else if(command.type==='set-document'){
             if(!['reference-catalog','guides','thumbnails','preferences'].includes(command.key))throw Error('文档键无效');
             const old=db.prepare('SELECT data FROM documents WHERE key=?').get(command.key);
@@ -247,6 +280,39 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
               const item=catalog.items.find(i=>i.id===id);if(!item||!url.endsWith('-'+item.provenance.cutoutSha256.slice(0,12)+'.webp'))throw Error('缩略图与当前衣物不匹配');checkMedia(url);
             }
             db.prepare('INSERT INTO documents VALUES (?,?) ON CONFLICT(key) DO UPDATE SET data=excluded.data').run(command.key,json(command.data));
+          }else if(command.type==='restore-garments'){
+            // Restoration is deliberately separate from intake. A reserved ID
+            // can only return with its original alias and archived evidence;
+            // unrelated records, outfits and retired URLs are never revived.
+            if(typeof command.reason!=='string'||!command.reason.trim())throw Error('恢复须明确提供原因');
+            if(!Array.isArray(command.records)||!command.records.length||command.records.length>100||new Set(command.records.map(r=>r?.record?.id)).size!==command.records.length)throw Error('请指定无重复的确切恢复记录');
+            const sameRow=(a,b)=>a===undefined||b===undefined?a===b:isDeepStrictEqual(parse(json(a)),parse(json(b)));
+            const base=({assets,provenance,imageHistory,wardrobeStatus,wardrobeStatusChangedAt,...rest})=>rest;
+            const source=({review,...rest})=>rest;
+            const sources=new Set(catalog.items.map(i=>json([i.provenance.originalSha256,i.provenance.sourceItemKey??null])));
+            const prepared=command.records.map(entry=>{
+              const {record,archivedRecord,expectedIdentity,expectedStored,expectedVersions}=entry;
+              if(!record||!archivedRecord||!Object.hasOwn(entry,'expectedStored')||!Array.isArray(expectedVersions))throw Error('缺少恢复档案或删除状态快照');
+              const identity=db.prepare('SELECT * FROM identities WHERE id=?').get(record.id)||null;
+              if(!identity||identity.kind!=='garment'||!sameRow(identity,expectedIdentity)||record.code!==identity.code||archivedRecord.id!==identity.id||archivedRecord.code!==identity.code)throw Error('恢复只能使用原有衣物 ID 和编号');
+              const stored=db.prepare('SELECT * FROM garments WHERE id=?').get(record.id)||null;
+              const versions=db.prepare('SELECT * FROM garment_versions WHERE garment_id=? ORDER BY version').all(record.id);
+              if(!sameRow(stored,expectedStored)||!sameRow(versions,expectedVersions))throw Error('删除状态已改变，请重新核对');
+              if(stored&&!stored.deleted_at)throw Error('衣物仍在目录中，不能重复恢复');
+              if(!sameRow(base(record),base(archivedRecord))||!sameRow(source(record.provenance),source(archivedRecord.provenance)))throw Error('恢复须保留原档案及图片证据');
+              if(stored&&!sameRow(base({id:record.id,...parse(stored.data),code:identity.code}),base(archivedRecord)))throw Error('恢复档案与删除记录不符');
+              if(!/^[a-f0-9]{64}$/.test(record.provenance.originalSha256)||!/^[a-f0-9]{64}$/.test(record.provenance.cutoutSha256))throw Error('恢复缺少原始图片校验值');
+              const key=json([record.provenance.originalSha256,record.provenance.sourceItemKey??null]);
+              if(sources.has(key))throw Error('重复来源，请核对已有衣物');
+              sources.add(key);validateCatalog({items:[record]});
+              return {record,stored};
+            });
+            if(command.assets)for(const asset of command.assets)registerAsset(asset);
+            let position=db.prepare('SELECT COALESCE(MAX(position),-1)+1 AS n FROM garments').get().n;
+            for(const {record,stored} of prepared){
+              if(stored)db.prepare('UPDATE garments SET deleted_at=NULL WHERE id=?').run(record.id);
+              writeGarment(record,stored?.position??position++);
+            }
           }else if(command.type==='upsert-garment'){
             const record=command.record;
             const old=catalog.items.find(i=>i.id===record?.id);
@@ -277,14 +343,15 @@ export function createRelationalStore(filename=':memory:',{catalog,items,mediaRo
           setMeta('catalog_meta',json({...parse(meta('catalog_meta')||'{"schemaVersion":1}'),updatedAt:new Date().toISOString()}));bump();
         }else{
           const current=command.type==='import-backup'?read():activeRecords();
-          if(command.type==='upsert-owned-outfit'&&!current.outfits.some(o=>o.id===command.record?.id)&&db.prepare('SELECT 1 FROM identities WHERE id=?').get(command.record?.id))throw Error('已删除的搭配 ID 已保留；恢复须显式导入备份，不能重用');
+          if(['upsert-owned-outfit','upsert-planned-outfit'].includes(command.type)&&!current.outfits.some(o=>o.id===command.record?.id)&&db.prepare('SELECT 1 FROM identities WHERE id=?').get(command.record?.id))throw Error('已删除的搭配 ID 已保留；恢复须显式导入备份，不能重用');
           const next=applyCommand(current,command,readCatalog().items,resolveReference);
           if(command.type==='import-backup')replaceForImport(next);
           else if(command.type==='remove-owned-outfits'){
             for(const r of command.records)db.prepare('DELETE FROM outfits WHERE id=?').run(r.id);bump();
           }else{
             const isNote=command.type==='save-note',record=next[isNote?'saved':'outfits'].find(r=>r.id===command.record.id);
-            const position=db.prepare(`SELECT COALESCE(MAX(position),-1)+1 AS n FROM ${isNote?'notes':'outfits'}`).get().n;
+            const table=isNote?'notes':'outfits';
+            const position=db.prepare(`SELECT position FROM ${table} WHERE id=?`).get(record.id)?.position??db.prepare(`SELECT COALESCE(MAX(position),-1)+1 AS n FROM ${table}`).get().n;
             if(isNote)db.prepare('INSERT INTO notes VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(record.id,position,json(record));
             else writeOutfit(number([record],'outfit')[0],position);bump();
           }

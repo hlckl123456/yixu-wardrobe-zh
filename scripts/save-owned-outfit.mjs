@@ -37,7 +37,7 @@ if(record.visual){
 const {items}=await readResource('catalog');
 for(const [slot,value] of Object.entries(record.selection||{}))record.selection[slot]=resolveCode(items,value).id;
 if(record.visual?.garmentIds)record.visual.garmentIds=record.visual.garmentIds.map(value=>resolveCode(items,value).id);
-const command={type:'upsert-owned-outfit',record,...(previous?{expected:previous}:{})};
+const command={type:record.outfitKind==='planned'?'upsert-planned-outfit':'upsert-owned-outfit',record,...(previous?{expected:previous}:{})};
 const validated=applyCommand(state.data,command,items,referenceContext).outfits.find(o=>o.id===record.id);
 if(previous&&JSON.stringify(previous)===JSON.stringify(validated)){console.log('搭配已存在，内容相同；未重复写入。');process.exit(0);}
 const response=await fetch(origin+'/__yixu_local/api/command',{method:'POST',headers:{'Content-Type':'application/json','X-Yixu-Client':'3',Origin:origin},body:JSON.stringify({command,requestId:crypto.randomUUID()})});

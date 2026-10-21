@@ -60,7 +60,7 @@ export function createLocalServer({root = defaultRoot, databasePath=':memory:',d
         const payload=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');
         // Reference failures cannot block server startup, reads, notes or recovery.
         let resolveReference;
-        if(pathname.endsWith('/command')&&payload.command?.type==='upsert-owned-outfit'&&payload.command.record?.sourceReference){
+        if(pathname.endsWith('/command')&&['upsert-owned-outfit','upsert-planned-outfit'].includes(payload.command?.type)&&payload.command.record?.sourceReference){
           const {referenceContext}=await import('../dist/navigation-model.js');
           resolveReference=hash=>referenceContext(hash,store.document('reference-catalog')||emptyReferences);
         }
@@ -90,6 +90,12 @@ export function createLocalServer({root = defaultRoot, databasePath=':memory:',d
     // files are reachable; database, archives, prompts and preferences are not.
     const asset=store.asset(pathname);
     if(asset&&mediaRoot){
+      if(asset.kind==='retired')return finish(410,'Removed from this wardrobe');
+      if(asset.kind.startsWith('redirect:')){
+        const target=asset.kind.slice('redirect:'.length),destination=store.asset(target);
+        if(!destination||destination.kind==='retired'||destination.kind.startsWith('redirect:'))return finish(410,'Review no longer available');
+        response.setHeader('Location','/'+target);return finish(307);
+      }
       try{
         const file=containedFile(mediaRoot,asset.relative_path),real=await fs.promises.realpath(file);
         if(!real.startsWith(fs.realpathSync(mediaRoot)+path.sep))return finish(404,'Not found');

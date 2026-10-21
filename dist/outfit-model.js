@@ -10,6 +10,7 @@ export function outfitListHref({season='all',style='all'}={}){
   const q=new URLSearchParams();if(season!=='all')q.set('season',season);if(style!=='all')q.set('style',style);
   return '#outfits'+(q.size?'?'+q:'');
 }
+export const mixListHref=options=>outfitListHref(options).replace('#outfits','#mix');
 export function outfitFilters(outfits,{season='all',style='all'}={}){
   const seasons=[...outfitSeasons];
   if(outfits.some(o=>!o.season))seasons.push({id:'unclassified',name:'待归类'});

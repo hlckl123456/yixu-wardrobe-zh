@@ -10,6 +10,7 @@ export const garmentImageBadge=item=>isReconstructed(item)?`<span class="garment
 
 const paths = {
   layout: 'M3 3h7v18H3z M14 3h7v8h-7z M14 15h7v6h-7z',
+  shuffle: 'M3 7h3c5 0 7 10 12 10h3 M18 14l3 3-3 3 M3 17h3c2 0 4-2 6-5 M14 9c1-1 2-2 4-2h3 M18 4l3 3-3 3',
   shirt: 'm8 3-5 3-2 5 5 2v8h12v-8l5-2-2-5-5-3c0 4-8 4-8 0',
   coat: 'm8 3-5 3v15h7l2-15 2 15h7V6l-5-3-4 3z',
   pants: 'M5 3h14l2 18h-7l-2-12-2 12H3z',

@@ -8,7 +8,7 @@ import {outfitTitle} from '../outfit-model.js';
 export function garmentOutfits(outfits,status='ready'){
   if(status==='loading')return '<h3>用在哪些搭配里</h3><p role="status">正在读取数据库关联…</p>';
   if(status!=='ready'||outfits===null)return '<h3>用在哪些搭配里</h3><p role="status">搭配关联暂未读取，不能判断是否用过。</p><button class="text-button" data-resource-retry="personal">重新读取</button>';
-  return `<h3>出现在 ${outfits.length} 套搭配中</h3><p class="sources">只统计「我的搭配」，不是实际穿着次数。</p>${outfits.length?`<div class="related-outfits">${outfits.map(o=>`<a data-related-outfit href="#outfits/${encodeURIComponent(o.id)}" title="${esc(outfitTitle(o))}" aria-label="查看 ${esc(o.code||o.id)}：${esc(outfitTitle(o))}">${codeBadge(o)}<span>${esc(outfitTitle(o))}</span></a>`).join('')}</div>`:'<p>目前没有正式搭配使用这件衣物。</p>'}`;
+  return `<h3>出现在 ${outfits.length} 套搭配中</h3><p class="sources">只统计「我的搭配」，不是实际穿着次数；含未购单品的组合会另行标明。</p>${outfits.length?`<div class="related-outfits">${outfits.map(o=>`<a data-related-outfit href="#outfits/${encodeURIComponent(o.id)}" title="${esc(outfitTitle(o))}" aria-label="查看 ${esc(o.code||o.id)}：${esc(outfitTitle(o))}">${codeBadge(o)}<span>${esc(outfitTitle(o))}${o.outfitKind==='planned'?' · 含未购单品':''}</span></a>`).join('')}</div>`:'<p>目前没有正式搭配使用这件衣物。</p>'}`;
 }
 
 export function detailDialog(item,{outfits=null,status='loading'}={}) {

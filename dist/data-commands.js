@@ -10,8 +10,10 @@ export function applyCommand(previous, command, items = [], resolveReference) {
   assertCurrentCommand(command?.type);
   const data = normalizePreferences(previous);
   switch (command.type) {
-    case 'upsert-owned-outfit': {
+    case 'upsert-owned-outfit':
+    case 'upsert-planned-outfit': {
       const record=normalizePreferences({outfits:[command.record]}).outfits[0];
+      if((command.type==='upsert-planned-outfit')!==(record.outfitKind==='planned'))throw Error('请明确区分已有搭配和含未购单品的待购搭配');
       if(record.sourceReference&&!resolveReference?.(record.sourceReference))throw Error('参考穿法链接无效或未读取，未保存搭配');
       const entries=Object.entries(record.selection);
       if(!entries.length||new Set(entries.map(([,id])=>id)).size!==entries.length)throw Error('真实搭配须包含衣物，且不能重复占用同一件');

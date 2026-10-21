@@ -3,6 +3,7 @@ import {legacyOutfitLink,normalizeHistoricalCuration} from './compatibility/pers
 import {outfitSeasons,outfitStyles} from './outfit-model.js';
 import {validCode} from './communication-codes.js';
 import {normalizeAssumedBasics} from './assumed-basics.js';
+import {validateSuggestedPieces} from './reviews/suggested-pieces.js';
 export const selectionSlots = ['outer', 'middle', 'inner', 'tie', 'bottom', 'shoes', 'belt', 'bag', 'accessory'];
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 export const emptyPreferences = () => ({selections: {owned: {}}, outfits: [], saved: []});
@@ -44,7 +45,14 @@ function records(value, kind, repairDuplicates) {
 
 function outfitPresentation(record){
   const result={};
-  if(record.suggestedPieces!==undefined&&(!Array.isArray(record.suggestedPieces)||record.suggestedPieces.length))throw Error('含未购单品的方案不能作为已有搭配保存，请先确认实际衣物');
+  if(record.outfitKind!==undefined&&!['owned','planned'].includes(record.outfitKind))throw Error('搭配类型无效');
+  if(record.outfitKind==='planned'){
+    validateSuggestedPieces(record.suggestedPieces);
+    if(!record.suggestedPieces?.length)throw Error('待购搭配须保留未购单品说明');
+    if(record.suggestedPieces.some(p=>record.selection[p.slot]||p.slot==='inner'&&record.assumedBasics?.length))throw Error('未购单品不能与真实衣物或基础内搭占用同一位置');
+    result.outfitKind='planned';
+    result.suggestedPieces=JSON.parse(JSON.stringify(record.suggestedPieces));
+  }else if(record.suggestedPieces!==undefined&&(!Array.isArray(record.suggestedPieces)||record.suggestedPieces.length))throw Error('含未购单品的方案不能作为已有搭配保存，请显式保存为待购搭配');
   if(record.code!==undefined){
     if(!validCode(record.code,'DP'))throw Error('搭配短编号无效');
     result.code=record.code;
