@@ -8,9 +8,9 @@
 
 ## 先看完整演示
 
-[![衣序完整演示：同一衣橱，100 套搭配](docs/media/video-poster.png)](https://github.com/hlckl123456/yixu-wardrobe-zh/releases/download/demo-2026-10-22/yixu-demo-zh.mp4)
+https://github.com/user-attachments/assets/c71a9504-50dc-487f-9cb6-c3941e5765c5
 
-**点击封面观看或下载 3 分 32 秒完整视频，带中文讲解。** 从整理自己的衣服，到挑选搭配、随心换批，再到买衣服前让 AI 帮忙看看。也可以[直接打开或下载完整视频](https://github.com/hlckl123456/yixu-wardrobe-zh/releases/download/demo-2026-10-22/yixu-demo-zh.mp4)。
+**3 分 32 秒完整演示，带中文讲解，可以直接在这里播放。** 从整理自己的衣服，到挑选搭配、随心换批，再到买衣服前让 AI 帮忙看看。页面内使用压缩版，也可以[下载原画质完整版](https://github.com/hlckl123456/yixu-wardrobe-zh/releases/download/demo-2026-10-22/yixu-demo-zh.mp4)。
 
 > 下方截图来自我的真实衣橱，拍摄时有 105 件在用衣物、166 套已保存搭配。衣物照片对应我已有的衣服；人物上身图是 AI 搭配示意，不是我的试穿照片。公开源码从空衣橱开始，展示用截图和视频不等于下载后自带的数据。
 
