@@ -18,6 +18,9 @@ test('public editions isolate default data and retain publication documentation'
   const files=fs.readdirSync(target,{recursive:true});
   for(const file of ['LICENSE','SECURITY.md','docs/DEMO.md','docs/MAINTENANCE.md','docs/ci-workflow.yml.example'])assert(files.includes(file),file);
   for(const file of ['dist/appearance.js','dist/closet-overview.js','dist/mix-model.js','dist/views/personal.js','tests/public/refined-design.test.mjs','tests/public/mix.test.mjs'])assert(files.includes(file),file);
-  for(const file of files)assert.doesNotMatch(file,/^private-data(?:\/|$)|^demo-data(?:\/|$)|^scripts\/(?:english-|localize-english|finalize-english)|\.(?:png|jpe?g|heic|sqlite)(?:-|$)/i);
+  const presentationMedia=new Set(['docs/media/video-poster.png','docs/media/outfits.png','docs/media/wardrobe.png','docs/media/shuffle.png','docs/media/overview.png','docs/media/preview.gif']);
+  for(const file of presentationMedia)assert(files.includes(file),file);
+  assert(files.includes('docs/media/README.md'));
+  for(const file of files)if(!presentationMedia.has(file))assert.doesNotMatch(file,/^private-data(?:\/|$)|^demo-data(?:\/|$)|^scripts\/(?:english-|localize-english|finalize-english)|\.(?:png|jpe?g|gif|mp4|mov|webm|heic|sqlite)(?:-|$)/i);
   assert.match(fs.readFileSync(path.join(target,'README.md'),'utf8'),/https:\/\/github\.com\/hlckl123456\/yixu-wardrobe-en/);
 });

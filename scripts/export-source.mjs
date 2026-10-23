@@ -7,6 +7,7 @@ export function exportSource(target){
   const files=[];
   function allowed(relative){
     if(relative==='docs/AGENT-WORKFLOW.md')return true;
+    if(['docs/media/README.md','docs/media/video-poster.png','docs/media/outfits.png','docs/media/wardrobe.png','docs/media/shuffle.png','docs/media/overview.png','docs/media/preview.gif'].includes(relative))return true;
     if(['README.md','AGENTS.md','LICENSE','SECURITY.md','package.json','.gitignore','启动衣橱.command','停止衣橱.command','Start Wardrobe.command','Stop Wardrobe.command','docs/ARCHITECTURE.md','docs/MAINTENANCE.md','docs/DEMO.md','docs/ci-workflow.yml.example','.github/workflows/test.yml'].includes(relative))return true;
     if(/^scripts\/(?:english-|localize-english|finalize-english)/.test(relative))return false;
     if(/^scripts\/[\w-]+\.(mjs|zsh)$/.test(relative)||/^tests\/public\/[\w.-]+\.(mjs|js)$/.test(relative))return true;
@@ -16,7 +17,7 @@ export function exportSource(target){
   function walk(dir,relative=''){
     for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
       const name=relative?relative+'/'+entry.name:entry.name;if(entry.isSymbolicLink())continue;
-      if(entry.isDirectory()){if(['dist','scripts','tests','tests/public','docs','dist/data','dist/views','dist/compatibility','dist/reviews','.github','.github/workflows'].includes(name))walk(path.join(dir,entry.name),name);}
+      if(entry.isDirectory()){if(['dist','scripts','tests','tests/public','docs','docs/media','dist/data','dist/views','dist/compatibility','dist/reviews','.github','.github/workflows'].includes(name))walk(path.join(dir,entry.name),name);}
       else if(allowed(name))files.push(name);
     }
   }
